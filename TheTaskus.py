@@ -85,7 +85,7 @@ for town in dataset:
 bar = go.Bar(x=towns,
               y=calls)
 
-should_be_pie= go.Bar(x=towns,
+should_be_pie = go.Bar(x=towns,
             y=calls)
 dates=set()
 callsses=[]
@@ -97,7 +97,7 @@ for town in dataset:
                 empty_dict[date_and_time]+=1
             else:
                 empty_dict[date_and_time]=1
-scat = go.Scatter(x=list(empty_dict.keys()),
+should_be_scatter = go.Bar(x=list(empty_dict.keys()),
                   y=list(empty_dict.values()))
 
 
@@ -107,7 +107,7 @@ fig.append_trace(bar, 1, 1)
 
 fig.append_trace(should_be_pie, 1, 2)
 
-fig.append_trace(scat, 2, 1)
+fig.append_trace(should_be_scatter, 2, 1)
 
 plotly.offline.plot(fig, filename='graphics.html')
 
