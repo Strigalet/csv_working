@@ -12,13 +12,13 @@ def getDate_and_time(line):
     return date_and_time[0],result[1]
 def getTown(line):
     result = re.split(r",", line, maxsplit=1)
-    town=re.findall(r"[A-Z]+\s?[A-Z]+",result[0])
+    town=re.search(r"[A-Z]+\s?([A-Z]+\s?)*",result[0])
     if not town:
         return "NO TOWN",result[1]
     return town[0],result[1]
 def getAddress(line):
     result = re.split(r",", line, maxsplit=1)
-    address=re.findall(r"[A-Z]+([A-Z]+\s)*\-?\&?\s?[A-Z]+([A-Z]+\s)*",result[0])
+    address=re.search(r"(\w*\s?)+(\&\s)*(\w*\s?)*",result[0])
     if not address:
         return "NO ADDRESS"
     return address[0]
@@ -61,8 +61,6 @@ try:
                 }
             current_line += 1
 
-
-
 except IOError as io_error:
     print("Error with file", io_error.errno, io_error.strerror)
 
@@ -79,10 +77,6 @@ for town in dataset:
             counter+=1
     calls.append(counter)
 
-bar = go.Bar(x=towns,y=calls,name="Diagram of calls in towns")
-
-should_be_pie = go.Scatter(x=towns,y=calls,name="Graph of calls in towns")
-
 
 empty_dict=dict()
 for town in dataset:
@@ -92,6 +86,11 @@ for town in dataset:
                 empty_dict[date_and_time]+=1
             else:
                 empty_dict[date_and_time]=1
+
+
+bar = go.Bar(x=towns,y=calls,name="Diagram of calls in towns")
+
+should_be_pie = go.Scatter(x=towns,y=calls,name="Graph of calls in towns")
 
 scat = go.Scatter(x=list(empty_dict.keys()),y=list(empty_dict.values()),name="Calls in moment")
 
