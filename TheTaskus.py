@@ -12,13 +12,15 @@ def getDate_and_time(line):
     return date_and_time[0],result[1]
 def getTown(line):
     result = re.split(r",", line, maxsplit=1)
-    town=re.search(r"[A-Z]+\s?[A-Z]+",result[0])
+    town=re.findall(r"[A-Z]+\s?[A-Z]+",result[0])
     if not town:
-        return "NO TOWN"
+        return "NO TOWN",result[1]
     return town[0],result[1]
 def getAddress(line):
     result = re.split(r",", line, maxsplit=1)
-    address=re.search(r"[A-Z]+[A-Z,\s]*\-?\&?[A-Z,\s]",result[0])
+    address=re.findall(r"[A-Z]+([A-Z]+\s)*\-?\&?\s?[A-Z]+([A-Z]+\s)*",result[0])
+    if not address:
+        return "NO ADDRESS"
     return address[0]
 
 dataset = dict()
@@ -37,14 +39,9 @@ try:
             address=getAddress(new_line)
             if town in dataset:
                 if address in dataset[town]:
-                    if date_and_time in dataset[town][address]:
-                        pass
-
-
-                    else:
-                        dataset[town][address][date_and_time] = {
-                            "title": title
-                        }
+                    dataset[town][address][date_and_time] = {
+                        "title": title
+                    }
                 else:
                     dataset[town][address] = {
                         date_and_time: {
@@ -82,13 +79,11 @@ for town in dataset:
             counter+=1
     calls.append(counter)
 
-bar = go.Bar(x=towns,
-              y=calls)
+bar = go.Bar(x=towns,y=calls,name="Diagram of calls in towns")
 
-should_be_pie = go.Bar(x=towns,
-            y=calls)
-dates=set()
-callsses=[]
+should_be_pie = go.Scatter(x=towns,y=calls,name="Graph of calls in towns")
+
+
 empty_dict=dict()
 for town in dataset:
     for address in dataset[town]:
@@ -97,8 +92,9 @@ for town in dataset:
                 empty_dict[date_and_time]+=1
             else:
                 empty_dict[date_and_time]=1
-should_be_scatter = go.Bar(x=list(empty_dict.keys()),
-                  y=list(empty_dict.values()))
+
+scat = go.Scatter(x=list(empty_dict.keys()),y=list(empty_dict.values()),name="Calls in moment")
+
 
 
 fig = tools.make_subplots(rows=2, cols=2)
@@ -107,9 +103,9 @@ fig.append_trace(bar, 1, 1)
 
 fig.append_trace(should_be_pie, 1, 2)
 
-fig.append_trace(should_be_scatter, 2, 1)
+fig.append_trace(scat, 2, 1)
 
-plotly.offline.plot(fig, filename='graphics.html')
+plotly.offline.plot(fig, filename='plololotly.html')
 
 
 
