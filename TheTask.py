@@ -71,7 +71,7 @@ for town in dataset:
             continue
         equal_addresssese.add(address)
         for i in cheking_address:
-            if i != "ST" and i != "AVE" and i != "RD" and i != "N" and i != "MAIN" and i!="&" and i!="OLD" and i!= "END" and i in address:
+            if i!="ST" and i!="AVE" and i!="N" and i!="MAIN" and i!="&" and i!="OLD" and i!= "END" and i!= "DR" and "RD" not in i and i in address:
                 status = "no"
                 break
         cheking_address += address.split()
