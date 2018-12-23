@@ -3,24 +3,17 @@ import plotly
 import plotly.graph_objs as go
 def getTitle(line):
     result=re.split(r",",line,maxsplit=5)
-    title=re.search(r"[A-Z]+[a-z]*\:\s[A-Z]+[A-Z,\s]*\-?",result[4])
-    return title[0], result[5]
+    return result[0], result[5]
 def getDate_and_time(line):
     result = re.split(r",", line, maxsplit=1)
-    date_and_time=re.search(r"[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])\s([0-1]\d|2[0-3])(:[0-5]\d){2}",result[0])
+    date_and_time=re.search(r"[0-9]{4}(-|:|\.)(0[1-9]|1[012])(-|:|\.)(0[1-9]|1[0-9]|2[0-9]|3[01])\s([0-1]\d|2[0-3])((-|:|\.)[0-5]\d){2}",result[0])
     return date_and_time[0],result[1]
 def getTown(line):
     result = re.split(r",", line, maxsplit=1)
-    town=re.search(r"[A-Z]+\s?([A-Z]+\s?)*",result[0])
-    if not town:
-        return "NO TOWN",result[1]
-    return town[0],result[1]
+    return result[0],result[1]
 def getAddress(line):
     result = re.split(r",", line, maxsplit=1)
-    address=re.search(r"(\w*\s?)+(\&\s)*(\w*\s?)*",result[0])
-    if not address:
-        return "NO ADDRESS"
-    return address[0]
+    return result[0]
 
 dataset = dict()
 
@@ -65,26 +58,49 @@ except IOError as io_error:
 
 except ValueError as v_error:
     print("Error in line",current_line,v_error)
-
+equal_addresssese=set()
 towns=[]
 calls=[]
 for town in dataset:
     counter=0
     towns.append(town)
+    cheking_address = []
     for address in dataset[town]:
-        for date_and_time in dataset[town][address]:
-            counter+=1
+        status = "yes"
+        if address in equal_addresssese:
+            continue
+        equal_addresssese.add(address)
+        for i in cheking_address:
+            if i != "ST" and i != "AVE" and i != "RD" and i != "N" and i != "MAIN" and i!="&" and i!="OLD" and i!= "END" and i in address:
+                status = "no"
+                break
+        cheking_address += address.split()
+        if status!="no":
+            for date_and_time in dataset[town][address]:
+                counter+=1
     calls.append(counter)
 
-
+equal_addresssese=set()
 empty_dict=dict()
 for town in dataset:
+    cheking_address = []
     for address in dataset[town]:
-        for date_and_time in dataset[town][address]:
-            if date_and_time in empty_dict:
-                empty_dict[date_and_time]+=1
-            else:
-                empty_dict[date_and_time]=1
+        status="yes"
+        if address in equal_addresssese:
+            continue
+        equal_addresssese.add(address)
+        for i in cheking_address:
+            if i!="ST" and i!="AVE" and i!="RD" and i!="N" and i!="MAIN" and i!="&" and i!="OLD" and i!= "END" and i in address:
+                status = "no"
+                break
+        cheking_address+=address.split()
+        if status!="no":
+            for date_and_time in dataset[town][address]:
+                if date_and_time in empty_dict:
+                    empty_dict[date_and_time]+=1
+                else:
+                    empty_dict[date_and_time]=1
+
 
 figure = { "data" : [
         {
@@ -112,6 +128,5 @@ figure = { "data" : [
     ], "layout" : go.Layout(
             xaxis=dict(domain=[0, 0.45]), yaxis=dict(domain=[0, 0.45]),
             xaxis2=dict(domain=[0.55, 1]), yaxis2=dict(domain=[0, 0.45], anchor='x2'))}
-
 
 plotly.offline.plot(figure, filename='plololotly.html')
